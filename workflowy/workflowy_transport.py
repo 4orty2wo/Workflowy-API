@@ -8,6 +8,7 @@ class WorkFlowyTransport:
     API_URL = "https://workflowy.com/%s"
     TIMEOUT = 5
 
+
     def __init__(self, session_id=False):
         self.session = requests.Session()
 
@@ -16,18 +17,25 @@ class WorkFlowyTransport:
 
             raise WorkFlowyException('Invalid session ID')
         self.session_id = session_id
+        self.client_id = None
+        self.client_version = None
 
 
-    def listRequest(self, endpoint, data={}):
+    def listRequest(self, endpoint: str, data: dict = {}):
         # if not isinstance(endpoint, str) or isinstance(data, dict):
         #     raise WorkFlowyException('Invalid API request')
-        
-        # data = {
-        #     'client_id': 
+
+        # headers = {
+        #     'client_id': self.client_id,
         # }
 
         # self.api_request('push_and_poll', )
+        
         pass
+
+    def get_initialization_data(self):
+        return self.api_request('get_initialization_data', {})
+
 
     def api_request(self, endpoint, data={}):
         if self.session_id is False:
@@ -85,7 +93,6 @@ class WorkFlowyTransport:
                     if 'sessionid' in cookie:
                         # Extract the sessionid value from the cookie
                         sessionid = cookie.split(';')[0].split('=')[1]
-                        print("Session ID:", sessionid)
                         return sessionid
             return False
 

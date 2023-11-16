@@ -5,7 +5,7 @@ class WorkFlowyAccount:
 
     def __init__(self, session_id):
         self.transport = WorkFlowyTransport(session_id)
-        init_data = self.transport.api_request('get_initialization_data', {})
+        init_data = self.transport.get_initialization_data()
         self.user = init_data['user']
             
 
