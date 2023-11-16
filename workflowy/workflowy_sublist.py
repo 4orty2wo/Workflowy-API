@@ -115,6 +115,16 @@ class WorkFlowySublist:
         return self.sublists
     
 
+    '''
+    Get the sublist with the given ID
+    '''
+    def get_sublist(self, id: str):
+        if id in self.list.sublists:
+            return self.list.sublists[id]
+        else:
+            raise WorkFlowyException(f"Sublist {id} not found")
+    
+
 
 
 

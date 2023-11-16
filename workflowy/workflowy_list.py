@@ -56,10 +56,10 @@ class WorkFlowyList:
             completed_time = self.dateJoinedTimestampInSeconds + raw_list['cp']
         else:
             completed_time = 0
-        sublists = []
+        processed_sublists = []
 
         for raw_sublist in raw_sublists:
-            sublists.append(self.__parse_list(raw_sublist, id, level + 1))
+            processed_sublists.append(self.__parse_list(raw_sublist, id, level + 1))
 
         sublist = WorkFlowySublist(
             id=id, 
@@ -69,7 +69,7 @@ class WorkFlowyList:
             creation_time=creation_time, 
             last_modified_time=last_modified_time, 
             completed_time=completed_time, 
-            sublists=sublists, 
+            sublists=processed_sublists, 
             main_list=self, 
             transport=self.transport
             )
