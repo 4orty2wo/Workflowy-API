@@ -41,9 +41,10 @@ class WorkFlowySublist:
     Recursively searches for a sublist by name
     @param name: The name of the sublist to search for
     @param get_all: Whether to return all sublists with matching names or just the first found instance
+    @param exact_match: Whether to search for an exact match or a partial match
     @return: A list of matching sublists
     '''
-    def search_sublist(self, expression: str, get_all: bool = False):
+    def search_sublist(self, expression: str, get_all: bool = False, exact_match: bool = False):
         # Search for a sublist by name using regular expression
         # Returns a list of matching sublists
         # If get_all is true, returns all sublists with matching names
@@ -54,25 +55,19 @@ class WorkFlowySublist:
             raise WorkFlowyException('Search expression must be a string')
         
         matches = []
-        
-        if re.search(expression, self.name, re.IGNORECASE):
-            if get_all:
-                matches.append(self)
-            else:
-                return self
+        if (exact_match and expression == self.name) or (not exact_match and re.search(expression, self.name, re.IGNORECASE)):
+            matches.append(self)
+            if not get_all:
+                return matches
             
         for sublist in self.sublists:
-            match = sublist.search_sublist(expression, get_all)
+            match = sublist.search_sublist(expression, get_all, exact_match)
             if match:
-                if get_all:
-                    if isinstance(match, list):
-                        matches.extend(match)
-                    else:
-                        matches.append(match)
-                else:
-                    return match
+                matches.extend(match)
+                if not get_all and len(matches) > 0:
+                    return matches
             
-        return matches if get_all else False
+        return matches if matches else False
 
 
     def get_id(self):
