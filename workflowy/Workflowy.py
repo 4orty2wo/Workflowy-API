@@ -1,6 +1,4 @@
 from workflowy_account import WorkFlowyAccount
-# from workflowy_list import WorkFlowyList
-# from workflowy_opml import WorkFlowyOPML
 from workflowy_transport import WorkFlowyTransport
 from workflowy_exception import WorkFlowyException
 

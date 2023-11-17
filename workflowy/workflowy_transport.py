@@ -17,8 +17,8 @@ class WorkFlowyTransport:
 
             raise WorkFlowyException('Invalid session ID')
         self.session_id = session_id
-        self.client_id = None
         self.client_version = 21
+        self.client_id = None
         self.most_recent_operation_transaction_id = None
 
 
@@ -26,7 +26,7 @@ class WorkFlowyTransport:
     Handles push_and_poll requests
     '''
     def listRequest(self, action: str, data: dict = {}):
-        if not isinstance(action, str) or isinstance(data, dict):
+        if not isinstance(action, str) or not isinstance(data, dict):
             raise WorkFlowyException('Invalid API request')
 
         request_data = {
@@ -66,10 +66,9 @@ class WorkFlowyTransport:
         try:
             response = self.session.post(url, data=data, headers=headers)
             response.raise_for_status()
-            response_data = response.json()
-            self.client_id = response_data['projectTreeData']['clientId']
-
-            return response_data
+            response = response.json()
+            return response
+        
         except requests.exceptions.HTTPError as e:
             raise WorkFlowyException(f"HTTP error occurred: {e}")
         except requests.exceptions.RequestException as e:

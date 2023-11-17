@@ -1,88 +1,172 @@
 from workflowy_transport import WorkFlowyTransport
-from workflowy_sublist import WorkFlowySublist
+from workflowy_exception import WorkFlowyException
+import re
 
 class WorkFlowyList:
-    dateJoinedTimestampInSeconds = 0
+    change_stack = {}
 
 
-    '''
-    Constructor
-    Builds a WorkFlowyList object with hierarchic relations between all its sublists
-    @param session_id: The session ID of the user
-    '''
-    def __init__(self, session_id):
-        self.transport = WorkFlowyTransport(session_id=session_id)
-
-
-    '''
-    Retrieves the main list
-
-    '''
-    def get_list(self):
-        init_data = WorkFlowyTransport.get_initialization_data(self.transport)
-        raw_list = []
-        self.parent_ids = {}
-        self.sublists = {}
-
-        if init_data['projectTreeData']['mainProjectTreeInfo']['rootProjectChildren']:
-            raw_list = init_data['projectTreeData']['mainProjectTreeInfo']['rootProjectChildren']
-
-        if init_data['projectTreeData']['mainProjectTreeInfo']['dateJoinedTimestampInSeconds']:
-            self.dateJoinedTimestampInSeconds = init_data['projectTreeData']['mainProjectTreeInfo']['dateJoinedTimestampInSeconds']
-        # return raw_list
-        return self.__parse_list(raw_list={
-                                    'id': None,
-                                    'nm': None,
-                                    'no': None,
-                                    'ct': None,
-                                    'lm': 0,
-                                    'ch': raw_list
-                                 }, parent_id=False, level=0)
-        
-
-    '''
-    Parses the given list and builds a WorkFlowyList object
-
-    '''
-    def __parse_list(self, raw_list, parent_id: str, level: int):
-        id = raw_list['id'] if 'id' in raw_list else ''
-        name = raw_list['nm'] if 'nm' in raw_list else ''
-        description = raw_list['no'] if 'no' in raw_list else ''
-        raw_sublists = raw_list['ch'] if 'ch' in raw_list else []
+    def __init__(self, id, name, description, level, creation_time, last_modified_time, completed_time, sublists, main_list, transport):
+        self.id = id if isinstance(id, str) else ''
+        self.name = name if isinstance(name, str) else ''
+        self.description = description if isinstance(description, str) else ''
+        self.level = level if isinstance(level, int) else -1
         # Time based values
-        creation_time = self.dateJoinedTimestampInSeconds + raw_list['ct'] if raw_list['ct'] is not None else 0
-        last_modified_time = self.dateJoinedTimestampInSeconds + raw_list['lm'] if raw_list['lm'] is not None else 0
-        if 'cp' in raw_list.keys() and raw_list['cp'] is not None:
-            completed_time = self.dateJoinedTimestampInSeconds + raw_list['cp']
+        self.creation_time = creation_time if isinstance(creation_time, int) else 0
+        self.last_modified_time = last_modified_time if isinstance(last_modified_time, int) else 0
+        self.completed_time = completed_time if isinstance(completed_time, int) else 0
+        self.sublists = []
+
+        # Check sublists
+        if isinstance(sublists, list):
+            for sublist in sublists:
+                if isinstance(sublist, WorkFlowyList):
+                    self.sublists.append(sublist)
+                else:
+                    raise WorkFlowyException('Sublists must be a WorkFlowyList object')
+
+        # Check list
+        if main_list.__class__.__name__ == 'WorkFlowyTree':
+            self.list = main_list
         else:
-            completed_time = 0
-        processed_sublists = []
-
-        for raw_sublist in raw_sublists:
-            processed_sublists.append(self.__parse_list(raw_sublist, id, level + 1))
-
-        sublist = WorkFlowySublist(
-            id=id, 
-            name=name, 
-            description=description, 
-            level=level,
-            creation_time=creation_time, 
-            last_modified_time=last_modified_time, 
-            completed_time=completed_time, 
-            sublists=processed_sublists, 
-            main_list=self, 
-            transport=self.transport
-            )
-
-        if parent_id:
-            self.parent_ids[id] = parent_id
-
-        self.sublists[id] = sublist
-        return sublist
+            raise WorkFlowyException('List must be a WorkFlowyTree object')
+        
+        # Check transport
+        if isinstance(transport, WorkFlowyTransport):
+            self.transport = transport
+        else:
+            raise WorkFlowyException('Transport must be a WorkFlowyTransport object')
         
 
-    def get_sublist_parent(self, id):
-        parent_id = self.parent_ids[id] if isinstance(id, str) and id in self.parent_ids else None 
-        return self.sublists[parent_id] if self.sublists[parent_id] else False
+    '''
+    Recursively searches for a list by name
+    @param name: The name of the list to search for
+    @param get_all: Whether to return all lists with matching names or just the first found instance
+    @param exact_match: Whether to search for an exact match or a partial match
+    @return: A list of matching lists
+    '''
+    def search_sublist(self, expression: str, get_all: bool = False, exact_match: bool = False):
+        # Search for a list by name using regular expression
+        # Returns a list of matching list
+        # If get_all is true, returns all list with matching names
+        # Otherwise, returns the first list with a matching name
 
+        # Check name
+        if not isinstance(expression, str):
+            raise WorkFlowyException('Search expression must be a string')
         
+        matches = []
+        if (exact_match and expression == self.name) or (not exact_match and re.search(expression, self.name, re.IGNORECASE)):
+            matches.append(self)
+            if not get_all:
+                return matches
+            
+        for sublist in self.sublists:
+            match = sublist.search_sublist(expression, get_all, exact_match)
+            if match:
+                matches.extend(match)
+                if not get_all and len(matches) > 0:
+                    return matches
+            
+        return matches if matches else False
+
+
+    def get_id(self):
+        return self.id
+    
+
+    def get_name(self):
+        return self.name
+    
+
+    def get_description(self):
+        return self.description
+    
+
+    def get_creation_time(self):
+        return self.creation_time
+    
+
+    def get_last_modified_time(self):
+        return self.last_modified_time
+    
+
+    def get_completed_time(self):
+        return self.completed_time
+    
+
+    def get_parent(self):
+        return self.list.get_sublist_parent(self.id)
+
+
+    def is_completed(self):
+        return self.completed_time != 0
+    
+
+    def get_level(self):
+        return self.level
+    
+
+    # Implement this 
+    def get_opml(self):
+        pass
+
+
+    def get_sublists(self):
+        return self.sublists
+    
+
+    '''
+    Get the list with the given ID
+    '''
+    def get_list(self, id: str):
+        if id in self.list.sublists:
+            return self.list.sublists[id]
+        else:
+            raise WorkFlowyException(f"List {id} not found")
+        
+
+    # Setters
+
+    def set_name(self, name: str):
+        self.name = name
+        self.transport.listRequest('edit', {
+            'projectid': self.id,
+            'name': name
+        })
+        
+    
+    def set_description(self, description: str):
+        self.description = description
+        self.transport.listRequest('edit', {
+            'projectid': self.id,
+            'description': description
+        })
+        
+
+    def set_complete(self, complete: bool):
+        if complete:
+            self.completed_time = self.transport.get_timestamp()
+        else:
+            self.completed_time = 0
+        
+
+    def set_parent(self, parent):
+        if not isinstance(parent, self.__class__):
+            raise WorkFlowyException('Parent must be a WorkFlowyList object')
+        
+
+    def delete():
+        pass
+
+
+    def create_list():
+        pass
+    
+
+    def __generate_id():
+        pass
+
+
+
+    
