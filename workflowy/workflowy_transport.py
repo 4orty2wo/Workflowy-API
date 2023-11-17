@@ -1,6 +1,6 @@
 import requests
 from workflowy_exception import WorkFlowyException
-import re
+import re, json, uuid
 
 class WorkFlowyTransport:
 
@@ -18,26 +18,37 @@ class WorkFlowyTransport:
             raise WorkFlowyException('Invalid session ID')
         self.session_id = session_id
         self.client_id = None
-        self.client_version = None
+        self.client_version = 21
+        self.most_recent_operation_transaction_id = None
 
 
-    def listRequest(self, endpoint: str, data: dict = {}):
-        # if not isinstance(endpoint, str) or isinstance(data, dict):
-        #     raise WorkFlowyException('Invalid API request')
+    '''
+    Handles push_and_poll requests
+    '''
+    def listRequest(self, action: str, data: dict = {}):
+        if not isinstance(action, str) or isinstance(data, dict):
+            raise WorkFlowyException('Invalid API request')
 
-        # headers = {
-        #     'client_id': self.client_id,
-        # }
+        request_data = {
+            'client_id': self.client_id,
+            'client_version': self.client_version,
+            'push_poll_id': self.__generate_uuid(),
+            'push_poll_data': json.dumps([{
+                'most_recent_operation_transaction_id': self.most_recent_operation_transaction_id,
+                'operations': [{
+                    'type': action,
+                    'data': data
+                }]
+            }])
+        }
 
-        # self.api_request('push_and_poll', )
-        
-        pass
+        self.__api_request('push_and_poll', request_data)
 
     def get_initialization_data(self):
-        return self.api_request('get_initialization_data', {})
+        return self.__api_request('get_initialization_data', {})
 
 
-    def api_request(self, endpoint, data={}):
+    def __api_request(self, endpoint, data={}):
         if self.session_id is False:
             raise WorkFlowyException('A session ID is needed to make API calls.')
 
@@ -55,7 +66,10 @@ class WorkFlowyTransport:
         try:
             response = self.session.post(url, data=data, headers=headers)
             response.raise_for_status()
-            return response.json()
+            response_data = response.json()
+            self.client_id = response_data['projectTreeData']['clientId']
+
+            return response_data
         except requests.exceptions.HTTPError as e:
             raise WorkFlowyException(f"HTTP error occurred: {e}")
         except requests.exceptions.RequestException as e:
@@ -101,6 +115,9 @@ class WorkFlowyTransport:
         except requests.exceptions.RequestException as e:
             raise WorkFlowyException(f"Error during request: {e}")
 
-# Example usage:
-# transport = WorkflowyTransport('your_username', 'your_password')
-# transport.login()
+
+    '''
+    Generates 8 character UUID
+    '''
+    def __generate_uuid(self):
+        return str(uuid.uuid4())[:8]
