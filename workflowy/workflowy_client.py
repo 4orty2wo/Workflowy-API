@@ -46,5 +46,9 @@ class WorkFlowyClient:
         return self.account.get_account()
 
 
+    # TODO: Implement exporting OPML of a list
+    '''
+    Returns an OPML string of the given list. If no list is given, returns an OPML string of the main list.
+    '''
     def export_opml(self, list_id):
         pass
