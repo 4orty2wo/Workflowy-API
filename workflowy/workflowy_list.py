@@ -26,10 +26,10 @@ class WorkFlowyList:
                     raise WorkFlowyException('Sublists must be a WorkFlowyList object')
 
         # Check list
-        if main_list.__class__.__name__ == 'WorkFlowyTree':
+        if main_list.__class__.__name__ == 'WorkFlowyProject':
             self.main_list = main_list
         else:
-            raise WorkFlowyException('List must be a WorkFlowyTree object')
+            raise WorkFlowyException('List must be a WorkFlowyProject object')
         
         # Check transport
         if isinstance(transport, WorkFlowyTransport):
