@@ -7,7 +7,7 @@ class WorkFlowyTree:
 
     '''
     Constructor
-    Builds a WorkFlowyList object with hierarchic relations between all its sublists
+    Builds a WorkFlowyList object with hierarchic relations between all its lists
     @param session_id: The session ID of the user
     '''
     def __init__(self, session_id):
@@ -22,7 +22,7 @@ class WorkFlowyTree:
         init_data = WorkFlowyTransport.get_initialization_data(self.transport)
         raw_list = []
         self.parent_ids = {}
-        self.sublists = {}
+        self.all_lists = {}
 
         if init_data['projectTreeData']['mainProjectTreeInfo']['rootProjectChildren']:
             raw_list = init_data['projectTreeData']['mainProjectTreeInfo']['rootProjectChildren']
@@ -83,12 +83,12 @@ class WorkFlowyTree:
         if parent_id:
             self.parent_ids[id] = parent_id
 
-        self.sublists[id] = sublist
+        self.all_lists[id] = sublist
         return sublist
         
 
-    def get_sublist_parent(self, id):
-        parent_id = self.parent_ids[id] if isinstance(id, str) and id in self.parent_ids else None 
-        return self.sublists[parent_id] if self.sublists[parent_id] else False
+    def get_list_parent(self, id):
+        parent_id = self.parent_ids[id] if isinstance(id, str) and id in self.parent_ids else None
+        return self.all_lists[parent_id] if self.all_lists[parent_id] else False
 
         
