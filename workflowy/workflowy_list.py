@@ -242,6 +242,23 @@ class WorkFlowyList:
                 **properties # Merge the properties into the request
             })
     
+        # Update the main list
+        new_list = WorkFlowyList(
+            id=new_id,
+            name=name,
+            description=description,
+            level=self.level + 1,
+            creation_time=0,
+            last_modified_time=0,
+            completed_time=0,
+            sublists=[],
+            main_list=self.main_list,
+            transport=self.transport
+        )
+        self.main_list.all_lists[new_id] = new_list
+        self.main_list.parent_ids[new_id] = self.id
+        self.sublists.insert(priority, new_list)
+        
 
     def __generate_id(self):
         id_parts = []
