@@ -1,5 +1,7 @@
 # Workflowy-API
-A Python API for Workflowy, a nested note taking application. An official API is not currently available, so I made this for personal use until Workflowy releases an official API. Inspiration was drawn from another unofficial API created in PHP by another user here: [workflowy-php](https://github.com/johansatge/workflowy-php).
+A Python API for Workflowy, a nested note taking application. I've created this in abscence of an official API from Workflowy. This is primarily a python wrapper for the REST operations that is performed on the backend of the web application. 
+
+Inspiration was drawn from another unofficial API created in PHP by another user here: [workflowy-php](https://github.com/johansatge/workflowy-php).
 
 ## Installation
 A PyPi package will be released once I test with recent changes as of February 2024.
