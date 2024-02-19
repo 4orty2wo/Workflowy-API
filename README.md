@@ -47,3 +47,18 @@ This will return a list object that allows for execution of list operations.
 | `move(destination, priority=0)` | None | Moves the list to a new destination. Raises `WorkFlowyException` under certain conditions. |
 | `delete()` | None | Deletes the list. Raises `WorkFlowyException` if the list is the root. |
 | `create_sublist(name=None, description=None, priority=0)` | None | Creates a new sublist within the current list. |
+
+### Account
+
+| Function | Returns | Description |
+| --- | --- | --- |
+| `get_email()` | `str` | Returns the email associated with the account. |
+| `get_name()` | `str` | Returns the full name of the account owner. |
+| `get_registration_date()` | `str` | Returns the date when the account was created. |
+| `get_monthly_item_quota()` | `int` | Returns the maximum number of items allowed to be created in a month. |
+| `get_items_created_this_month()` | `int` | Returns the number of items created in the current month. |
+| `get_invite_link()` | `str` | Returns the invite link for the account. |
+
+## Credits
+- [Workflowy](https://workflowy.com/)
+- [Johan Satgé](https://github.com/johansatge)
