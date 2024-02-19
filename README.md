@@ -16,7 +16,7 @@ The `client` variable will be used to perform requests to read/write from your l
 The `session_id` is not perpetually valid, but in the time that it is active, it can be used multiple times for as many requests as you want to use it for. Best to utilize this as a rolling API key in replacement after passing the unencoded password once. Take care to not have your password hardcoded in your python file.
 
 ### Lists
-Get your root list with the `get_main_list()` client method. 
+Get the root list with the `get_main_list()` client method. 
 ```list = client.get_main_list()```
 This will return a list object that allows for execution of list operations.
 
@@ -49,6 +49,9 @@ This will return a list object that allows for execution of list operations.
 | `create_sublist(name=None, description=None, priority=0)` | None | Creates a new sublist within the current list. |
 
 ### Account
+Get the account with the `get_account_info()` client method.
+`account = client.get_account_info()`
+This will return an account object for access to _get_ operations.
 
 | Function | Returns | Description |
 | --- | --- | --- |
