@@ -53,7 +53,7 @@ This will return a list object that allows for execution of list operations.
 ### Account
 Get the account with the `get_account_info()` client method.
 `account = client.get_account_info()`
-This will return an account object for access to _get_ operations.
+This will return an account object for use in getting account info.
 
 | Function | Returns | Description |
 | --- | --- | --- |
